@@ -1,0 +1,152 @@
+﻿
+<!-- TODO 1/5: Set these two values (make a new Guid for the ProductUpgradeCode)  -->
+<?define ProductVersion = "1.0.1"?>
+<?define ProductUpgradeCode = "{1A567425-DB24-4590-9E65-BB5AF259F26F}"?>
+
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:netfx="http://wixtoolset.org/schemas/v4/wxs/netfx" xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+  <Package Name="!(loc.ProductName)" Language="!(loc.LANG)" Version="$(var.ProductVersion)" Manufacturer="!(loc.ProductManufacturer)" UpgradeCode="$(var.ProductUpgradeCode)" InstallerVersion="200" Scope="perUser"><SummaryInformation Manufacturer="!(loc.ProductManufacturer)" Description="!(loc.ProductDescription)" />
+    
+    <MediaTemplate EmbedCab="yes" />
+    <MajorUpgrade Schedule="afterInstallInitialize" DowngradeErrorMessage="A newer version of [ProductName] is already installed." AllowSameVersionUpgrades="yes" />
+
+    <WixVariable Id="WixUIBannerBmp" Value="Resources\Banner.jpg" />
+    <WixVariable Id="WixUIDialogBmp" Value="Resources\Dialog.jpg" />
+    <WixVariable Id="WixUILicenseRtf" Value="Resources\EULA.rtf" />
+
+
+    <!-- ICONS -->
+    <Icon Id="ProductIcon" SourceFile="Resources\Icon.ico" />
+    <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
+
+    <!-- Windows Installer set TARGETDIR to the local hard drive with the most free space.  The top-level Directory must be Id="TARGETDIR" Name="SourceDir" -->
+    
+
+    <!-- There must be a feature in the project and all components must be installed into the feature to be installed. -->
+    <Feature Id="ExcelAddIn" Title="!(loc.ProductName)" Description="!(loc.ProductDescription)" Level="1" AllowAdvertise="no">
+      <ComponentGroupRef Id="XLLDistributables" />
+    </Feature>
+
+    <PropertyRef Id="NETFRAMEWORK40CLIENT" />
+    <Launch Condition="Installed OR NETFRAMEWORK40CLIENT" Message="[ProductName] requires .NET Framework 4.0." />
+    <UI Id="UI">
+       <!--See http://wix.sourceforge.net/manual-wix3/WixUI_index.htm for more information
+       The following line adds the minimal WiX Dialog set to the install--> 
+      <ui:WixUI Id="WixUI_Minimal" />
+      <!-- This TextStyle is used in the CustonMessages.wxl file -->
+      <TextStyle Id="Black10" FaceName="Tahoma" Size="10" Red="0" Green="0" Blue="0" Bold="yes" />
+    </UI>
+    <!--IMPORTANT ALL MS OFFICE SUPPORTED VERSIONS ARE HERE: Office 2003, 2007, 2010, 2013, 2016 Keep it uptodate-->
+    <!-- these numbers will be parsed individually in the custom actions with InvariantCulture and NumberStyles.Any -->
+    <Property Id="OFFICEREGKEYS" Value="11.0,12.0,14.0,15.0,16.0" />
+    <Property Id="XLL32" Value="!(loc.ProductNameNoSpace)32.xll" />
+    <Property Id="XLL64" Value="!(loc.ProductNameNoSpace)64.xll" />
+    
+    <!-- The property below will disable the repair button. -->
+    <!--<Property Id="ARPNOREPAIR" Value="yes" />-->
+    <Property Id="PromptToCloseProcesses" Value="EXCEL" />
+    <Property Id="PromptToCloseDisplayNames" Value="Microsoft Excel" />
+    
+    <!--
+    To handle registering the XLL, a custom action project must be created and a project reference must be created. 
+    This project will create a DLL that WiX can understand.
+    The binary refers to the dll created by the custom action project.
+    If values are to be passed to the custom action project, the set property actions must precede the action specifying the DLL entry point.
+    The InstallExecuteSequence specifies the sequence to run the actions and the AdminExecuteSequence provide rights to non-admin users (to the registry).
+    For more information on custom actions, read
+    http://www.codeproject.com/Articles/132918/Creating-Custom-Action-for-WIX-Written-in-Managed?fid=1599130&df=90&mpp=25&noise=3&prof=False&sort=Position&view=Quick&spc=Relaxed&select=4131367&fr=1#xx0xx
+    -->
+    
+    <Binary Id="InstallerCA.CA.dll" SourceFile="$(var.InstallerCA.TargetDir)$(var.InstallerCA.TargetName).CA.dll" />
+    <CustomAction Id="Action_RegisterAddIn.SetProperty" Return="check" Property="Action_RegisterAddIn" Value="OFFICEREGKEYS=[OFFICEREGKEYS];XLL32=[XLL32];XLL64=[XLL64]" />
+    <CustomAction Id="Action_RegisterAddIn" DllEntry="CaRegisterAddIn" Return="check" Execute="immediate" BinaryRef="InstallerCA.CA.dll"/>
+    <CustomAction Id="Action_UnRegisterAddIn.SetProperty" Return="check" Property="Action_UnRegisterAddIn" Value="OFFICEREGKEYS=[OFFICEREGKEYS];XLL32=[XLL32];XLL64=[XLL64]" />
+    <CustomAction Id="Action_UnRegisterAddIn" DllEntry="CaUnRegisterAddIn" Return="check" Execute="immediate" BinaryRef="InstallerCA.CA.dll" />
+    <CustomAction Id="Action_CloseAppsPrompt" DllEntry="ClosePrompt" Return="check" BinaryRef="InstallerCA.CA.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="Action_CloseAppsPrompt" After="Action_RegisterAddIn.SetProperty" />
+      <Custom Action="Action_RegisterAddIn.SetProperty" Before="Action_RegisterAddIn" Condition="NOT Installed" />
+      <Custom Action="Action_RegisterAddIn" Before="InstallFinalize" Condition="NOT Installed" />
+      <Custom Action="Action_UnRegisterAddIn.SetProperty" Before="Action_UnRegisterAddIn" Condition="Installed AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="Action_UnRegisterAddIn" Before="InstallFinalize" Condition="Installed AND NOT UPGRADINGPRODUCTCODE" />
+    </InstallExecuteSequence>
+    <AdminExecuteSequence>
+      <Custom Action="Action_CloseAppsPrompt" After="Action_RegisterAddIn.SetProperty" />
+      <Custom Action="Action_RegisterAddIn.SetProperty" Before="InstallFinalize" Condition="NOT Installed" />
+      <Custom Action="Action_RegisterAddIn" After="Action_RegisterAddIn.SetProperty" Condition="NOT Installed" />
+      <Custom Action="Action_UnRegisterAddIn.SetProperty" Before="InstallFinalize" Condition="Installed AND NOT UPGRADINGPRODUCTCODE" />
+      <Custom Action="Action_UnRegisterAddIn" After="Action_UnRegisterAddIn.SetProperty" Condition="Installed AND NOT UPGRADINGPRODUCTCODE" />
+    </AdminExecuteSequence>
+
+  
+      <StandardDirectory Id="ProgramFilesFolder">
+        <Directory Id="COMPANYDIR" Name="!(loc.ProductManufacturer)" />
+      </StandardDirectory>
+      <StandardDirectory Id="AppDataFolder">
+        <Directory Id="COMPANYAPPDATADIR" Name="!(loc.ProductManufacturer)">
+          <!-- !! THIS ID IS USED IN THE CUSTOM ACTION SO DO NOT CHANGE IT -->
+          <Directory Id="AddinFolder" Name="!(loc.ProductName)">
+          </Directory>
+        </Directory>
+      </StandardDirectory>
+    </Package>
+
+  <Fragment>
+    <!-- 
+    Components always have unique GUIDs so that Windows can track every file installed. This information is stored in the registry.
+    Components should only contain a single file. KeyPath files will be replaced if missing by the repair button on the installer.
+    -->
+    <ComponentGroup Id="XLLDistributables">
+      <!-- TODO 2/5: Make a new Guid for the Component  -->
+      <Component Id="XLL32" Guid="{E1271E41-6F39-41D8-9DFE-48B6D816C79B}" Directory="AddinFolder">
+        <RegistryValue Root="HKCU" Key="Software\!(loc.ProductManufacturer)\!(loc.ProductNameNoSpace)" Name="Xll32Bit" Value="AddIns" KeyPath="yes" Type="string" />
+
+        <!-- TODO 3/5: Set the Source path to the 32-bit xll location -->
+        <File Id="EXCELXLL32PACKED.XLL" Name="!(loc.ProductNameNoSpace)32.xll" Source="C:\Users\aelmendo\Downloads\AddInManager-master\AddInManager-master\Source\AddInManager\bin\Debug\net9.0-windows\publish\ExcelDna.AddInManager-AddIn-packed.xll">
+          <netfx:NativeImage Id="ngen_32Xll" Platform="32bit" Priority="0" />
+        </File>
+      </Component>
+      <!-- TODO 4/5: Make a new Guid for the Component  -->
+      <Component Id="XLL64" Guid="{87A55C9D-3DB5-40E6-BDA6-CB2DF2DF7954}" Directory="AddinFolder">
+        <RegistryValue Root="HKCU" Key="Software\!(loc.ProductManufacturer)\!(loc.ProductNameNoSpace)" Name="Xll64Bit" Value="AddIns" KeyPath="yes" Type="string" />
+        
+        <!-- TODO 5/5: Set the Source path to the 32-bit xll location -->
+        <File Id="EXCELXLL64PACKED.XLL" Name="!(loc.ProductNameNoSpace)64.xll" Source="C:\Users\aelmendo\Downloads\AddInManager-master\AddInManager-master\Source\AddInManager\bin\Debug\net9.0-windows\publish\ExcelDna.AddInManager-AddIn64-packed.xll">
+          <netfx:NativeImage Id="ngen_64Xll" Platform="64bit" Priority="0" />
+        </File>
+        
+        <RemoveFile On="uninstall" Id="XLL32" Directory="AddinFolder" Name="!(loc.ProductNameNoSpace)32.xll" />
+        <RemoveFile On="uninstall" Id="XLL64" Directory="AddinFolder" Name="!(loc.ProductNameNoSpace)64.xll" />
+        <RemoveFolder Id="AddinFolderRemove" Directory="AddinFolder" On="uninstall" />
+        <RemoveFolder Id="COMPANYAPPDATADIRRemove" Directory="COMPANYAPPDATADIR" On="uninstall" />
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+<!--  <Fragment>
+    <netfx:DotNetCoreSearch RuntimeType="desktop" MajorVersion="7" Platform="x64" Variable="DOTNETDESKTOPVERSION"/>
+    <netfx:DotNetCoreSearch
+            RuntimeType="desktop"
+            Platform="x64"
+            MajorVersion="7"
+            Variable="AspNetCoreRuntimeVersion"
+    />
+    <PackageGroup Id="DotNetDesktop7022Redist">
+      <ExePackage Id="DotNetDesktop7022"
+                  DetectCondition="DOTNETDESKTOPVERSION &gt;= &quot;7.0.22&quot;"
+                  Permanent="yes"
+                  Vital="no"
+                  InstallArguments="windowsdesktop-runtime-7.0.20-win-x64.exe /install /quiet /norestart"
+                  RepairArguments="windowsdesktop-runtime-7.0.20-win-x64.exe /repair /quiet /norestart"
+                  UninstallArguments="windowsdesktop-runtime-7.0.20-win-x64.exe /uninstall /quiet /norestart">
+        <ExePackagePayload
+                Description="Microsoft Windows Desktop Runtime - 7.0.20 (x64)"
+                ProductName="Microsoft Windows Desktop Runtime - 7.0.20 (x64)"
+                Name="windowsdesktop-runtime-7.0.20-win-x64.exe"
+                DownloadUrl="https://builds.dotnet.microsoft.com/dotnet/WindowsDesktop/7.0.20/windowsdesktop-runtime-7.0.20-win-x64.exe"
+                Hash="a0ed41e1672a25a9ee2cf3ca081e90f037b889100dbf8312e277447a801a4f3b7af464fa05fb796a24f89cd119102e8d0a382f4711e4e6263e5503642231da88"
+                Size="57837864"
+                Version="7.0.11.32825"
+        />
+      </ExePackage>
+    </PackageGroup>
+  </Fragment>-->
+</Wix>

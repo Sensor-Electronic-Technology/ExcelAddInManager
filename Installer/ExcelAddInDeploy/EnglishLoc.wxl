@@ -1,0 +1,11 @@
+﻿<WixLocalization Culture="en-us" xmlns="http://wixtoolset.org/schemas/v4/wxl">
+  <String Id="LANG" Value="1033" />
+  <String Id="ProductName" Value="SETi Add-In Manager" />
+  <String Id="ProductNameNoSpace" Value="SETi-AddIn" />
+  <String Id="ProductDescription" Value="Installer for SETi Excel Add-Ins" />
+  <String Id="ProductManufacturer" Value="Sensor Electronic Technology" />
+  <String Id="ProductVersion" Value="1" />
+  <String Id="ProductCopyright" Value="(c) 2025 SETi" />
+  <String Id="ProductUninstallDescription" Value="Uninstall !(loc.ProductName)" />
+  <String Id="AppName" Value="!(loc.ProductName)" />
+</WixLocalization>

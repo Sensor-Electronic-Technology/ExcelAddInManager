@@ -1,0 +1,12 @@
+﻿/AddInManager/obj/
+/AddInManager/bin/
+/AddInManager.Common/obj/
+/AddInManager.Common/bin/
+/AddInManager.IndexGenerator/obj/
+/AddInManager.IndexGenerator/bin/
+/Installer/ExcelAddInBundle/obj/
+/Installer/ExcelAddInBundle/bin/
+/Installer/ExcelAddInDeploy/obj/
+/Installer/ExcelAddInDeploy/bin/
+/Installer/InstallerCA/obj/
+/Installer/InstallerCA/bin/
