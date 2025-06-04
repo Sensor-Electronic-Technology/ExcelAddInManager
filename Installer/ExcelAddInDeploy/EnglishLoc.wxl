@@ -8,4 +8,5 @@
   <String Id="ProductCopyright" Value="(c) 2025 SETi" />
   <String Id="ProductUninstallDescription" Value="Uninstall !(loc.ProductName)" />
   <String Id="AppName" Value="!(loc.ProductName)" />
+  <String Id="PackagePath" Value="C:\Users\aelmendo\RiderProjects\AddInManager\AddInManager\bin\Release\net9.0-windows\publish"/>
 </WixLocalization>

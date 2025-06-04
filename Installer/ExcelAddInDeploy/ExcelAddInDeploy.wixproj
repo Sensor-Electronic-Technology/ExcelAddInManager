@@ -26,6 +26,8 @@
     <Folder Include="Resources" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CustomMessages.wxl" />
+    <Content Include="EnglishLoc.wxl" />
     <Content Include="Resources\Banner.jpg" />
     <Content Include="Resources\Dialog.jpg" />
     <Content Include="Resources\EULA.rtf" />

@@ -10,7 +10,7 @@
 
   <PropertyGroup>
     <ExcelAddInDisableAssemblyContextUnload>true</ExcelAddInDisableAssemblyContextUnload>
-    <ExcelAddInInclude>ExcelDna.AddInManager.Common.dll</ExcelAddInInclude>
+    <ExcelAddInInclude>AddInManager.Common.dll</ExcelAddInInclude>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,9 +18,9 @@
     <PackageReference Include="ExcelDna.Interop" Version="15.0.1" />
   </ItemGroup>
 
-  <ItemGroup>
+<!--  <ItemGroup>
     <ProjectReference Include="..\AddInManager.Common\AddInManager.Common.csproj" />
-  </ItemGroup>
+  </ItemGroup>-->
 
   <ItemGroup>
     <Compile Update="RibbonResources.Designer.cs">
@@ -35,6 +35,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>RibbonResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AddInManager.Common\AddInManager.Common.csproj" />
   </ItemGroup>
 
 </Project>
