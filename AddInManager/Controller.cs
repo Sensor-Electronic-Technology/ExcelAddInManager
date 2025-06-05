@@ -7,9 +7,11 @@ namespace AddInManager {
     internal class Controller {
         public Controller() {
             LoadGeneralOptions();
-
-            if (!Directory.Exists(installedDir))
+            if (!Directory.Exists(installedDir)) {
+                Initialize();
                 return;
+            }
+                
 
             if (generalOptions.autoUpdateAddIns)
                 AutoUpdateAddIns();
@@ -23,6 +25,17 @@ namespace AddInManager {
             foreach (var i in GetInstalledAddins()) {
                 Register(i.Path!);
             }
+        }
+
+        public void Initialize() {
+            this.generalOptions.autoUpdateAddIns = true;
+            this.generalOptions.sources = [
+                new AddInsSource {
+                    source =
+                        @"\\172.20.4.11\Data\Reactor Data\Shared\System monitoring\Monitoring Excel Addin\"
+                }
+            ];
+            Storage.SaveGeneralOptions(this.generalOptions);
         }
 
         public void OnInstall() {

@@ -7,6 +7,7 @@ public class MainAddIn : IExcelAddIn
     public void AutoOpen()
     {
         controller = new Controller();
+        
     }
 
     public void AutoClose()
