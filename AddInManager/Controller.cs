@@ -8,7 +8,7 @@ namespace AddInManager {
         public Controller() {
             LoadGeneralOptions();
             if (!Directory.Exists(installedDir)) {
-                Initialize();
+                //Initialize();
                 return;
             }
                 
